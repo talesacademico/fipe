@@ -14,6 +14,6 @@ export const GlobalStyle = createGlobalStyle`
   body{
     background-color: var(--background);
     -webkit-font-smoothing: antialiased;
-    margin: 50px;
+    margin: 10px;
   }
 `

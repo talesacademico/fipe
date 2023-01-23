@@ -1,10 +1,11 @@
 
 import { useEffect, useState } from "react"
 import { SelectComp } from "../../components/select"
-import { api } from "../../plugins/axios"
+import { api } from "../../services/axios"
 import { List } from "./components/list"
-import { Button } from "./styled"
+import { Button, FlexColumm } from "./styled"
 import { Exemple1 } from "../../components/reactChart/CompLineChart"
+import { getModelBrantsApi, getPriceApi, getYearModelApi, getYearModelByYearApi } from "../../services/fipe"
 
 
 
@@ -38,23 +39,19 @@ export const Dashboard = () => {
     })
   }
 
-  function getModelBrands({ value }) {
+  async function getModelBrands({ value }) {
     setDataModel({
       ...dataModel,
       codeBrands: value
     })
-    api.post('ConsultarModelos', {
-      codigoTipoVeiculo: 1,
-      codigoTabelaReferencia: dataModel.refTable,
-      codigoMarca: value
-    }).then(response => response.data)
-      .then(data => {
-        setListModelYears(data.Anos)
-        setListBrantsModel(data.Modelos)
-      })
+    const { refTable } = dataModel
+    const payload = await getModelBrantsApi({ value, code: 1, refTable })
+    const { years, models } = payload
+    setListModelYears(years)
+    setListBrantsModel(models)
   }
 
-  function getYearModelByYear({ value }) {
+  async function getYearModelByYear({ value }) {
     const data = value
     const [yearModel, typeFuel] = data.split('-')
     setDataModel({
@@ -70,17 +67,17 @@ export const Dashboard = () => {
       anoModelo: yearModel,
       codigoTipoCombustivel: typeFuel
     }
-    api.post('ConsultarModelosAtravesDoAno', payload)
-      .then(response => response.data)
-      .then(data => {
-        setListBrantsModel(data)
-      })
+    setListBrantsModel(
+      await getYearModelByYearApi(payload)
+    )
+
 
   }
   async function getPrice() {
     const prices = []
     let ref = dataModel.refTable
-    for (let i = 0; i < 48; i++) {
+    for (let i = 0; i < 10; i++) {
+
 
       const payload = {
         codigoTabelaReferencia: ref,
@@ -91,39 +88,32 @@ export const Dashboard = () => {
         codigoTipoCombustivel: dataModel.typeFuel,
         tipoConsulta: 'tradicional'
       }
+      ref = ref - 1
 
+      const data = await getPriceApi(payload)
 
-      await api.post('ConsultarValorComTodosParametros', payload)
-        .then(response => response.data)
-        .then(data => {
+      const formateDate =  Object.entries(data).map(element => {
+        console.log(element)
+        const label = element[0].split(/(?=[A-Z])/)
+          .join(',').replace(',', ' ')
+        return { label, value: element[1] }
+      })
       
-          if (data.codigo === '2') {
-            setDataVeicle(false)
-            return
-          }
-          const dataPrice = Object.entries(data).map(element => {
-            const label = element[0].split(/(?=[A-Z])/)
-              .join(',').replace(',', ' ')
 
-            return { label, value: element[1] }
-          })
-          if (prices.length === 0) {
-            setDataVeicle(dataPrice)
-          }
-        
-          data.Valor = data.Valor.replace(/\D/, '')
-          .replace('$ ', '').replace('.', '').replace(',', '')
-          prices.unshift(data)
+      if (i === 0) {
+        setDataVeicle(formateDate)
+      }
 
-        }).catch(e => {
-          console.log(e)
-        })
-        ref = ref-1
+      data.Valor = data.Valor.replace(/\D/, '')
+        .replace('$ ', '').split(',')[0]
+
+      prices.unshift(data)
     }
+
     setDataPriceArray(prices)
   }
 
-  function getYearModel({ value }) {
+  async function getYearModel({ value }) {
     const codeModel = value
     setDataModel({
       ...dataModel,
@@ -136,11 +126,9 @@ export const Dashboard = () => {
       codigoModelo: codeModel,
 
     }
-    api.post('ConsultarAnoModelo', payload)
-      .then(response => response.data)
-      .then(data => {
-        setListModelYears(data)
-      })
+    setListModelYears(
+      await getYearModelApi(payload)
+    )
   }
 
 
@@ -177,15 +165,19 @@ export const Dashboard = () => {
 
   return (
     <main>
-      {dataPriceArray[0] && <Exemple1 data={dataPriceArray}/>}
-      <SelectComp options={listrefYearMonth} onChange={setAttributeRefTable} label={'Mês Referência'} />
-      <SelectComp options={listBrands} onChange={getModelBrands} label={'Marca'} />
-      <SelectComp options={listModelYears} onChange={getYearModelByYear} label={'Ano Modelo'} />
-      <SelectComp options={listBrandsModel} onChange={getYearModel} label={'Modelo'} placeholder={'Selecione'} />
-      <Button onClick={getPrice}>Buscar</Button>
-      <div>
-        {dataVehicle && <List data={dataVehicle}></List>}
-      </div>
+      {dataPriceArray[0] && <Exemple1 data={dataPriceArray} />}
+      <FlexColumm>
+        <div>
+          <SelectComp options={listrefYearMonth} onChange={setAttributeRefTable} label={'Mês Referência'} />
+          <SelectComp options={listBrands} onChange={getModelBrands} label={'Marca'} />
+          <SelectComp options={listModelYears} onChange={getYearModelByYear} label={'Ano Modelo'} />
+          <SelectComp options={listBrandsModel} onChange={getYearModel} label={'Modelo'} placeholder={'Selecione'} />
+          <Button onClick={getPrice}>Buscar</Button>
+        </div>
+        <div>
+          {dataVehicle && <List data={dataVehicle}></List>}
+        </div>
+      </FlexColumm>
     </main>
   )
 }

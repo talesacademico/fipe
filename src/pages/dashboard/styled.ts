@@ -18,3 +18,12 @@ export const Button = styled.button`
     transform: 500ms;
     }
 `
+export const FlexColumm = styled.div`
+display: flex;
+justify-content: space-around;
+margin-top: 10vh;
+
+@media(max-width: 760px) {
+    display: block;
+}
+`
