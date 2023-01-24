@@ -103,7 +103,6 @@ export const Dashboard = () => {
               .join(',').replace(',', ' ')
             return { label, value: element[1] }
           })
-          console.log(dataPrice)
 
           if (prices.length === 0) {
             dataPrice.splice(5, 1)
