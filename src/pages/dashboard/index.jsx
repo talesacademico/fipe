@@ -76,8 +76,7 @@ export const Dashboard = () => {
   async function getPrice() {
     const prices = []
     let ref = dataModel.refTable
-    for (let i = 0; i < 10; i++) {
-
+    for (let i = 0; i < 24; i++) {
 
       const payload = {
         codigoTabelaReferencia: ref,
@@ -88,30 +87,44 @@ export const Dashboard = () => {
         codigoTipoCombustivel: dataModel.typeFuel,
         tipoConsulta: 'tradicional'
       }
+
+
+      await api.post('ConsultarValorComTodosParametros', payload)
+        .then(response => response.data)
+        .then(data => {
+
+          if (data.codigo === '2') {
+            setDataVeicle(false)
+            return
+          }
+
+          const dataPrice = Object.entries(data).map(element => {
+            const label = element[0].split(/(?=[A-Z])/)
+              .join(',').replace(',', ' ')
+            return { label, value: element[1] }
+          })
+          console.log(dataPrice)
+
+          if (prices.length === 0) {
+            dataPrice.splice(5, 1)
+            dataPrice.splice(6, 3)
+            setDataVeicle(dataPrice)
+          }
+
+          if (data.Valor) {
+            data.Valor = data.Valor.replace(/\D/, '')
+              .replace('$ ', '').replace('.', '').split(',')[0]
+            prices.unshift(data)
+          }
+
+        }).catch(e => {
+          console.log(e)
+        })
       ref = ref - 1
-
-      const data = await getPriceApi(payload)
-
-      const formateDate =  Object.entries(data).map(element => {
-        console.log(element)
-        const label = element[0].split(/(?=[A-Z])/)
-          .join(',').replace(',', ' ')
-        return { label, value: element[1] }
-      })
-      
-
-      if (i === 0) {
-        setDataVeicle(formateDate)
-      }
-
-      data.Valor = data.Valor.replace(/\D/, '')
-        .replace('$ ', '').split(',')[0]
-
-      prices.unshift(data)
     }
-
     setDataPriceArray(prices)
   }
+
 
   async function getYearModel({ value }) {
     const codeModel = value

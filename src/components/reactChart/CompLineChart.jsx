@@ -1,14 +1,11 @@
 
 import {
-  LineChart,
   AreaChart,
   ResponsiveContainer,
   Legend, Tooltip,
-  Line,
   Area,
   XAxis,
   YAxis,
-  CartesianGrid
 } from 'recharts';
 import {TamplateGrafic} from "./styled"
 
@@ -48,7 +45,7 @@ export function Exemple1({ data }) {
             tickLine={false}
             tickCount={4}
             />
-          <YAxis tickFormatter={(value)=> `${value} Mil`}
+          <YAxis tickFormatter={(value)=> new Intl.NumberFormat().format(value)}
               axisLine={false}
               tickLine={false}
             stroke="#ccc"
@@ -56,10 +53,9 @@ export function Exemple1({ data }) {
           >
           </YAxis>
           <Legend />
-          <Tooltip />
+          <Tooltip formatter={(value)=> new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}/>
           <Area dataKey="Valor" strokeWidth={3} type="monotone"
             stroke="#2451B7" activeDot={{ r: 8 }} fill="url(#color)" 
-
             
             />
 
