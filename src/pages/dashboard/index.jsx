@@ -5,7 +5,7 @@ import { api } from "../../services/axios"
 import { List } from "./components/list"
 import { Button, FlexColumm } from "./styled"
 import { Exemple1 } from "../../components/reactChart/CompLineChart"
-import { getModelBrantsApi, getPriceApi, getYearModelApi, getYearModelByYearApi } from "../../services/fipe"
+import { getModelBrantsApi, getYearModelApi, getYearModelByYearApi } from "../../services/fipe"
 
 
 
