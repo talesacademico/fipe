@@ -1,11 +1,11 @@
 import { GlobalStyle } from "./styles/global";
-import {Dashboard} from './pages/dashboard'
+import Routes from "./routes/routes";
 
 
 export function App() {
   return (
     <div className="App">
-      <Dashboard></Dashboard>
+      <Routes/>
       <GlobalStyle/>
      </div>
   );
